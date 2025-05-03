@@ -103,10 +103,20 @@
         </div>
 
     </form>
+    {{-- errors --}}
+    @if ($errors->any())
+        <div class="container">
+            <div class="row">
+                <div class="alert alert-danger text-center mt-03">
+                    Por favor, selecione ao menos uma operação. As parcelas devem ser de 0 a 999 e o número de operações entre 5 e 50
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- footer -->
     <footer class="text-center mt-5">
-        <p class="text-secondary">MathX &copy; <span class="text-info">[ANO]</span></p>
+        <p class="text-secondary">MathX &copy; <span class="text-info">{{ date('Y') }}</span></p>
     </footer>
 
     <!-- bootstrap -->
