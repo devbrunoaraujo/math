@@ -88,6 +88,21 @@ class MainController extends Controller
         }
 
         $exercises = session('exercises');
+        $filename = 'execises_'.env('APP_NAME').'_'.date('YmdHis').'.txt';
+        $content = '';
+        foreach ($exercises as $exercise) {
+            $content .= $exercise['number_exercise'] . '.  ' . $exercise['exercise'] . "\n";
+        }
+
+        $content .= "\n";
+        $content .= "Soluções\n" . str_repeat('-', 20) . "\n";
+        foreach ($exercises as $exercise) {
+            $content .= $exercise['number_exercise'] . '.  ' . $exercise['sollution'] . "\n";
+        }
+
+        return response($content)
+                ->header('Content-Type', 'text/plain')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     private function generateExercise($i, $operations, $min, $max): array
