@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\View\View;
 
 class MainController extends Controller
@@ -43,62 +44,97 @@ class MainController extends Controller
         $exercises = [];
         for ($i=1; $i <= $numberExercises ; $i++) {
 
-            $operation = $operations[array_rand($operations)];
-            $number1 = rand($min, $max);
-            $number2 = rand($min, $max);
-
-            $exercise = '';
-            $sollution = '';
-
-            switch ($operation) {
-                case 'sum':
-                    $exercise = "$number1 + $number2 =";
-                    $sollution = $number1 + $number2;
-                    break;
-
-                case 'subtration':
-                    $exercise = "$number1 - $number2 =";
-                    $sollution = $number1 - $number2;
-                    break;
-
-                case 'multiplication':
-                    $exercise = "$number1 * $number2 =";
-                    $sollution = $number1 * $number2;
-                    break;
-
-                case 'division':
-
-                    if ($number2 == 0) {
-                        $number2 = 1;
-                    }
-                    $exercise = "$number1 / $number2 =";
-                    $sollution = $number1 / $number2;
-                    break;
-            }
-
-            if (is_float($sollution)) {
-                $sollution = round($sollution, 2);
-            }
-
-            $exercises[] = [
-                'operation' => $operation,
-                'number_exercise' => $i,
-                'exercise' => $exercise,
-                'sollution' => "$exercise $sollution"
-            ];
+           $exercises[] = $this->generateExercise($i, $operations, $min, $max);
 
         }
+
+        session(['exercises' => $exercises]);
 
         return view('operations', ['exercises' => $exercises]);
     }
 
     public function printExercises()
     {
-        echo "Print exercises";
+        if (!session()->has('exercises')) {
+            return redirect()->route('home');
+        }
+
+        $exercises = session('exercises');
+
+        echo '<pre>';
+        echo '<h1>Exercícios de Matemática ('. env('APP_NAME') .')</h1>';
+        echo '<hr>';
+
+        //dd($exercises);
+
+        foreach ($exercises as $exercise) {
+            echo '<div><h2><small>'.$exercise['number_exercise'].'.  </small> '.$exercise['exercise'].'</h2></div>';
+        }
+
+        echo '<pre>';
+        echo '<hr>';
+        echo '<h2>Solução dos exercícios</h2>';
+
+        foreach ($exercises as $exercise) {
+            echo '<div><h4><small>'.$exercise['number_exercise'].'.  </small> '.$exercise['sollution'].'</h4></div>';
+        }
+
     }
 
     public function exportExercises()
     {
-        echo "export exercises";
+        if (!session()->has('exercises')) {
+            return redirect()->route('home');
+        }
+
+        $exercises = session('exercises');
+    }
+
+    private function generateExercise($i, $operations, $min, $max): array
+    {
+        $operation = $operations[array_rand($operations)];
+        $number1 = rand($min, $max);
+        $number2 = rand($min, $max);
+
+        $exercise = '';
+        $sollution = '';
+
+        switch ($operation) {
+            case 'sum':
+                $exercise = "$number1 + $number2 =";
+                $sollution = $number1 + $number2;
+                break;
+
+            case 'subtration':
+                $exercise = "$number1 - $number2 =";
+                $sollution = $number1 - $number2;
+                break;
+
+            case 'multiplication':
+                $exercise = "$number1 * $number2 =";
+                $sollution = $number1 * $number2;
+                break;
+
+            case 'division':
+
+                if ($number2 == 0) {
+                    $number2 = 1;
+                }
+
+                $exercise = "$number1 / $number2 =";
+                $sollution = $number1 / $number2;
+                break;
+        }
+
+        if (is_float($sollution)) {
+            $sollution = round($sollution, 2);
+        }
+
+        return [
+            'operation' => $operation,
+            'number_exercise' => str_pad($i, 2, '0', STR_PAD_LEFT),
+            'exercise' => $exercise,
+            'sollution' => "$exercise $sollution"
+        ];
     }
 }
